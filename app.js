@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const cors = require("cors");
+
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors());
 
 mongoose.connect("mongodb://localhost:27017/Cookr");
 
@@ -86,18 +89,22 @@ app.post("/login", function(req, res){
     })
 });
 
+
 app.post("/signup", function(req, res){
     console.log(req.body);
+
+
     User.register({username: req.body.username}, req.body.password, function(err, user){
         if(err){
             console.log(err);
+            res.status(502);
             res.send(err);
         }else{
             let a=0;
             passport.authenticate("local")(req, res, function(){
                 a=1;
                 console.log("Successfully logged in");
-                res.send("Successfully registered");
+               res.send(JSON.stringify({"status": 200, "error": null}));
             })
             console.log(a);
         }
