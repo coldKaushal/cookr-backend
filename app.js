@@ -70,19 +70,23 @@ app.get("/logout", function(req, res){
 
 
 app.post("/login", function(req, res){
+    console.log(req.body);
     const user = new User({
         username: req.body.username,
         password: req.body.password
     });
+    console.log(req.body);
     console.log(user);
     req.login(user, function(err){
         if(err){
-            console.log(err);
+            res.status(502);
+            res.send(err);
         }else{
             let a=0;
             passport.authenticate("local")(req, res, function(){
                 a=1;
-                res.send("successfully logged in");
+                console.log("Successfully logged in");
+               res.send(JSON.stringify({"status": 200, "error": null}));
             })
             console.log(a);
         }
