@@ -8,7 +8,6 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const cors = require("cors");
 
-
 const app = express();
 
 app.use(express.static("public"));
@@ -53,30 +52,41 @@ passport.serializeUser(function(user, done) {
 
 
 app.get("/", function(req, res){
+    console.log(req);
     if(req.isAuthenticated()){
-        console.log("Already logged in");
-        res.send("Already logged in");
+       console.log("Already logged in");
+       res.status(200); 
+       res.send("Already logged in");
     }else{
         console.log("Not logged in");
+        res.status(502);
         res.send("not logged in");
+
     }
 });
 
-app.get("/logout", function(req, res){
-    req.logout();
-    res.send("successfully logged out");
+app.post("/logout", function(req, res){
+    try {
+        req.logout();
+        res.status(200);
+        console.log("logged out");
+        res.send("successfully logged out");
+    } catch (error) {
+        res.status(502);
+        res.send(error)
+    }
 })
 
 
 
 app.post("/login", function(req, res){
-    console.log(req.body);
+    //console.log(req.body);
     const user = new User({
         username: req.body.username,
         password: req.body.password
     });
-    console.log(req.body);
-    console.log(user);
+    //console.log(req.body);
+    //console.log(user);
     req.login(user, function(err){
         if(err){
             res.status(502);
@@ -95,12 +105,12 @@ app.post("/login", function(req, res){
 
 
 app.post("/signup", function(req, res){
-    console.log(req.body);
+    //console.log(req.body);
 
 
     User.register({username: req.body.username}, req.body.password, function(err, user){
         if(err){
-            console.log(err);
+            //console.log(err);
             res.status(502);
             res.send(err);
         }else{
