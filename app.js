@@ -45,13 +45,25 @@ const userInfoSchema = new mongoose.Schema({
     country: String,
     state: String
 });
-
+const recipeSchema = new mongoose.Schema({
+    name: String,
+    ingredients: Array,
+    directions: Array,
+    url: String,
+    uniqueIngredients: Array,
+    id: String,
+    likes: Number,
+    comments: Number,
+    type: String,
+    difficulty: String,
+    time: String,
+})
 
 userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("Credential", userSchema);
 const UserInfo = new mongoose.model("Information", userInfoSchema);
-
+const Recipe = new mongoose.model("Recipe", recipeSchema);
 passport.use(User.createStrategy());
 
 passport.serializeUser(function (user, done) {
@@ -92,9 +104,9 @@ app.post("/getProfile", function (req, res) {
                 UserInfo.findOne({ 'username': userName }, function (err, foundUser) {
                     if (err) {
                         console.log(err);
-                        
+
                     } else {
-                        if(foundUser==null){
+                        if (foundUser == null) {
                             const emptyUser = {
                                 fname: "",
                                 lname: "",
@@ -108,7 +120,7 @@ app.post("/getProfile", function (req, res) {
                             }
                             res.status(200);
                             res.send(emptyUser);
-                        }else{
+                        } else {
                             res.status(200);
                             res.send(foundUser);
                         }
@@ -150,28 +162,28 @@ app.post("/profile", function (req, res) {
             country: userDetail.country,
             state: userDetail.state
         });
-        UserInfo.findOne({username: userDetail.username}, function(err, foundUser){
-            if(err){
+        UserInfo.findOne({ username: userDetail.username }, function (err, foundUser) {
+            if (err) {
                 console.log(err);
                 res.status(502);
-            }else{
-                if(foundUser==null){
+            } else {
+                if (foundUser == null) {
                     res.status(200);
-                    newUser.save(function(err){
-                        if(err){
+                    newUser.save(function (err) {
+                        if (err) {
                             console.log(err);
                             res.status(502);
-                        }else{
+                        } else {
                             res.status(200);
                             console.log("Success");
                         }
-                        
+
                     });
-                }else{
-                    UserInfo.deleteOne({username: foundUser.username}, function(err){
-                        if(err){
+                } else {
+                    UserInfo.deleteOne({ username: foundUser.username }, function (err) {
+                        if (err) {
                             console.log(err);
-                        }else{
+                        } else {
                             console.log("Suces");
                         }
                     });
@@ -235,6 +247,34 @@ app.post("/signup", function (req, res) {
         }
     })
 });
+
+
+app.post("/explore", function (req, res) {
+    console.log(req.body);
+    const index = req.body.index;
+    const type = req.body.type;
+    const difficulty = req.body.difficulty;
+    const time = req.body.time;
+    const name = req.body.name;
+    const emptyList = [];
+    const toskip = index * 8;
+    var query = Recipe.find({
+        type: (type === 'NA' ? { $nin: emptyList } : type),
+        difficulty: (difficulty === 'NA' ? { $nin: emptyList } : difficulty),
+        time: time === 'NA' ? { $nin: emptyList } : time,
+        name: name == 'NA' ? { $nin: emptyList } : { $regex: name }
+    }, { directions: 0, url: 0, uniqueIngredients: 0, ingredients: 0, __v: 0 }).skip(toskip).limit(9);
+    query.exec(function (err, result) {
+        if (err) {
+            res.status(502);
+            res.send("error");
+        } else {
+            res.status(200);
+            res.send(result);
+        }
+    })
+});
+
 
 
 
