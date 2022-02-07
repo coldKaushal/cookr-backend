@@ -250,20 +250,20 @@ app.post("/signup", function (req, res) {
 
 
 app.post("/explore", function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     const index = req.body.index;
     const type = req.body.type;
     const difficulty = req.body.difficulty;
     const time = req.body.time;
     const name = req.body.name;
     const emptyList = [];
-    const toskip = index * 8;
+    const toskip = index>0? (index-1)*8: 0;
     var query = Recipe.find({
         type: (type === 'NA' ? { $nin: emptyList } : type),
         difficulty: (difficulty === 'NA' ? { $nin: emptyList } : difficulty),
         time: time === 'NA' ? { $nin: emptyList } : time,
         name: name == 'NA' ? { $nin: emptyList } : { $regex: name }
-    }, { directions: 0, url: 0, uniqueIngredients: 0, ingredients: 0, __v: 0 }).skip(toskip).limit(9);
+    }, { directions: 0, url: 0, uniqueIngredients: 0, ingredients: 0, __v: 0 }).skip(toskip).limit(8);
     query.exec(function (err, result) {
         if (err) {
             res.status(502);
