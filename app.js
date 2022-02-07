@@ -262,7 +262,7 @@ app.post("/explore", function (req, res) {
         type: (type === 'NA' ? { $nin: emptyList } : type),
         difficulty: (difficulty === 'NA' ? { $nin: emptyList } : difficulty),
         time: time === 'NA' ? { $nin: emptyList } : time,
-        name: name == 'NA' ? { $nin: emptyList } : { $regex: name }
+        name: name == 'NA' ? { $nin: emptyList } : { $regex: name, "$options" : "i"}
     }, { directions: 0, url: 0, uniqueIngredients: 0, ingredients: 0, __v: 0 }).skip(toskip).limit(8);
     query.exec(function (err, result) {
         if (err) {
@@ -275,7 +275,20 @@ app.post("/explore", function (req, res) {
     })
 });
 
-
+app.post("/getPageCount", function(req, res){
+    
+    const model = req.body;
+    const name=req.body.name;
+    Recipe.find({...model, name:{$regex: name, "$options" : "i"}}, {_id:1, name:1}, function(err, found){
+        if(!err){
+            res.status(200);
+            res.send(found);
+        }else{
+            res.status(502);
+            res.send('error');
+        }
+    })
+})
 
 
 app.listen(4000, function () {
