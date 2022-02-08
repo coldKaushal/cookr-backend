@@ -311,8 +311,50 @@ app.post("/getIngredients", function(req, res){
     })
 })
 
-
-
+app.post("/getRecipe", function(req, res){
+    const ingredients = req.body.ingredients;
+    console.log(ingredients);
+    let finalData = [];
+    Recipe.find({},{name:1,url:1, uniqueIngredients:1, id:1,likes:1, comments:1, type:1, difficulty:1, time:1 }, function(err, found){
+        if(err){
+            res.status(502);
+            res.send(error);
+        }else{
+            found.forEach(recipe=>{
+                const recipeIngredients = recipe.uniqueIngredients;
+                let totalMatch = 0;
+                let totalmismatch = 0;
+                recipeIngredients.forEach(ingredient=>{
+                    if(ingredients.includes(ingredient)){
+                        totalMatch++;
+                    }else{
+                        totalmismatch++;
+                    }
+                })
+                const percentage = (totalMatch/(totalMatch + totalmismatch))*100;
+                // console.log(percentage);
+                const data_to_send = {
+                    name: recipe.name,
+                    difficulty: recipe.difficulty,
+                    likes: recipe.likes,
+                    comments: recipe.comments,
+                    type: recipe.type,
+                    uniqueIngredients: recipe.uniqueIngredients,
+                    percentage: percentage,
+                    id: recipe.id,
+                    time: recipe.time
+                }
+                finalData.push(data_to_send);
+            });
+            finalData.sort(function(a, b){
+                return a.percentage>b.percentage?1:-1;
+            })
+            const ret = finalData.filter(element => element.percentage>50);
+            res.status(200);
+            res.send(ret);
+        }
+    })
+})
 
 app.listen(4000, function () {
     console.log("Server started at port 4000");
