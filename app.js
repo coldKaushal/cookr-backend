@@ -290,6 +290,29 @@ app.post("/getPageCount", function(req, res){
     })
 })
 
+const ingredientsSchema = {
+    names: Array
+}
+
+const Ingredients = new mongoose.model('Ingredient', ingredientsSchema);
+
+app.post("/getIngredients", function(req, res){
+    const names = req.body.names;
+    console.log(names);
+    Ingredients.find({names: {$regex: names, $options: "i"}}, function(err, found){
+        if(err){
+            res.status(502);
+            res.send('error');
+        }else{
+            res.status(200);
+            console.log(found);
+            res.send(found);
+        }
+    })
+})
+
+
+
 
 app.listen(4000, function () {
     console.log("Server started at port 4000");

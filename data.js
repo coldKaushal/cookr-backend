@@ -1,7 +1,34 @@
-// const mongoose = require("mongoose");
-// mongoose.connect("mongodb://localhost:27017/Cookr");
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/Cookr");
 
-// const data=require('./new_data.json');
+const data=require('./new_data.json');
+
+
+
+
+
+let allIngredients = [];
+
+const ingredientsSchema = {
+    names : String
+}
+
+const Ingredients = new mongoose.model("Ingredient", ingredientsSchema); 
+
+data.forEach(recipe => {
+    allIngredients = allIngredients.concat(recipe.NER);
+    
+});
+const uniqueIngredients = [... new Set(allIngredients)];
+console.log(uniqueIngredients);
+
+uniqueIngredients.forEach(value=>{
+    const newIngredient = new Ingredients({
+        names : value
+    });
+    newIngredient.save();
+})
+
 
 
 // const recipeSchema = {
@@ -39,26 +66,9 @@
 //     newRecipe.save();
 // });
 
-// let allIngredients = [];
 
-// const ingredientsSchema = {
-//     names : Array
-// }
 
-// const Ingredients = new mongoose.model("Ingredient", ingredientsSchema); 
 
-// data.forEach(recipe => {
-//     allIngredients = allIngredients.concat(recipe.NER);
-    
-// });
-// const uniqueIngredients = [... new Set(allIngredients)];
-// console.log(uniqueIngredients);
-
-// const newIngredients = new Ingredients({
-//     names : uniqueIngredients
-// })
-
-// newIngredients.save()
 
 
 
