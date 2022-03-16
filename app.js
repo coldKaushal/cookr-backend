@@ -43,7 +43,9 @@ const userInfoSchema = new mongoose.Schema({
     postalcode: String,
     mobile: String,
     country: String,
-    state: String
+    state: String,
+    favourites: Array,
+    myRecipe: Array,
 });
 const recipeSchema = new mongoose.Schema({
     name: String,
@@ -57,6 +59,8 @@ const recipeSchema = new mongoose.Schema({
     type: String,
     difficulty: String,
     time: String,
+    usersLiked: Array,
+    usersCommented: Array,
 })
 
 userSchema.plugin(passportLocalMongoose);
@@ -371,7 +375,90 @@ app.post("/getBlog", function(req, res){
 })
 
 
+app.post("/favourite", function(req, res){
+    const id=req.body.id;
+    const username=req.body.username;
+    Recipe.findOne({id: id}, function(err, found){
+        if(err){
+            console.log(err);
+        }else{
+            found.usersLiked.push(username);
+            console.log(found);
+        }
+    })
+    UserInfo.findOne({username: username}, function(error, found){
+        if(error){
+            res.status(502);
+            res.send('error');
+        }else{
+            res.status(200);
+            found.favourites.push(id);
+            found.save();
+            console.log(found);
+            res.send('success');
 
+        }
+    })
+});
+
+app.post("/myrecipe", function(req, res){
+    const username= req.body.username;
+    const id=req.body.id;
+    UserInfo.findOne({username: username}, function(error, found){
+        if(error){
+            res.status(502);
+            res.send('error');
+        }else{
+            res.status(200);
+            found.myRecipe.push(id);
+            found.save();
+            console.log(found);
+            res.send('success');
+
+        }
+    })
+})
+
+app.post("/getfavourites", function(req, res){
+    const username = req.body.username;
+    UserInfo.findOne({username:username}, {favourites:1}, function(err, found){
+        if(err){
+            res.status(502);
+            res.send('error');
+        }
+        else{
+            Recipe.find({id: {$in: found.favourites}}, {id:1, name:1, likes:1, comments:1, difficulty:1, type:1, time:1}, function(err, foundR){
+                if(err){
+                res.status(502);
+                res.send('error');
+                }else{
+                    res.status(200);
+                    res.send(foundR)
+                }
+            } )
+        }
+    })
+});
+app.post("/getmyrecipe", function(req, res){
+    const username = req.body.username;
+    UserInfo.findOne({username:username}, {myRecipe:1}, function(err, found){
+        if(err){
+            res.status(200);
+            res.send('error');
+        }
+        else{
+            Recipe.find({id: {$in: found.myRecipe}}, {id:1, name:1, likes:1, comments:1, difficulty:1, type:1, time:1}, function(err, foundR){
+                if(err){
+                res.status(502);
+                res.send('error');
+                }else{
+                    res.status(200);
+                    res.send(foundR)
+                }
+            } )
+        }
+    })
+})
 
 app.listen(4000, function () {
     console.log("Server started at port 4000");
