@@ -27,7 +27,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
 
-mongoose.connect("mongodb://localhost:27017/Cookr");
+const url = process.env.MONGO_URL;
+
+mongoose.connect(url);
 
 const userSchema = new mongoose.Schema({
     username: String,
