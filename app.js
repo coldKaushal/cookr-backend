@@ -28,8 +28,15 @@ app.use(passport.session());
 app.use(cors());
 
 const url = process.env.MONGO_URL;
+mongoose.set("strictQuery", false);
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.warn("db connection done");
+  });
 
-mongoose.connect(url);
 
 const userSchema = new mongoose.Schema({
     username: String,
