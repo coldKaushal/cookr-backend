@@ -1,11 +1,17 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/Cookr");
-
+// mongoose.connect("mongodb://localhost:27017/Cookr");
+const dotenv = require("dotenv");
 const data=require('./new_data.json');
+dotenv.config();
 
 
-
-
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.warn("db connection done");
+  });
 
 let allIngredients = [];
 
